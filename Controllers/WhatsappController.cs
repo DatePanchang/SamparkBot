@@ -36,7 +36,7 @@ namespace sampark_whatsapp_bot.Controllers
       var requestBody = await new StreamReader(Request.Body).ReadToEndAsync();
       var requestJson = JObject.Parse(requestBody);
 
-      using HttpClient client = new();
+      using HttpClient client = new HttpClient();
 
       static async Task SendTextMsg(JObject requestJson, HttpClient client, string txtMsg)
       {
