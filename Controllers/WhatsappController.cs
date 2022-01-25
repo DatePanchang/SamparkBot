@@ -62,7 +62,7 @@ namespace sampark_whatsapp_bot.Controllers
         }
       }
 
-      await SendTextMsg(requestJson, client, "```दाते पंचांगाच्या WhatsApp सेवेमध्ये आपले स्वागत आहे.\t\nसोबत दिलेल्या लिंक्सवर क्लिक करून या सेवांचा लाभ घेऊ शकता.```\t\n\t\n*वेबसाइट*\t\n https://datepanchang.com \t\n*शंका समाधान*\t\n https://t.me/dpsoloffice \t\n\t\n*सेवा*\t\n*जन्मपत्रिका | कुंडली*\t\n https://web.datepanchang.com/#/Seva/Patrikaa \t\n*विवाह मेलन*\t\n https://web.datepanchang.com/#/Seva/Melan \t\n*विविध मुहूर्त*\t\n https://web.datepanchang.com/ \t\n\t\n*Social Handles*\t\n*Facebook*\t\n https://www.facebook.com/DatePanchang \t\n*Youtube*\t\n https://www.youtube.com/channel/UCMFEM4bpAiYDdbSrFKuq6RA \t\n*Instagram*\t\n https://www.instagram.com/date.panchang/ \t\n*Twitter*\t\n https://twitter.com/DatePanchang \t\n*Telegram*\t\n https://t.me/datepanchang");
+      await SendTextMsg(requestJson, client, "```दाते पंचांगाच्या WhatsApp सेवेमध्ये आपले स्वागत आहे.\t\nसोबत दिलेल्या लिंक्सवर क्लिक करून या सेवांचा लाभ घेऊ शकता.```\t\n\t\n*वेबसाइट*\t\n https://datepanchang.com \t\n*शंका समाधान*\t\n https://t.me/panchangsupportbot \t\n\t\n*सेवा*\t\n*जन्मपत्रिका | कुंडली*\t\n https://web.datepanchang.com/#/Seva/Patrikaa \t\n*विवाह मेलन*\t\n https://web.datepanchang.com/#/Seva/Melan \t\n*विविध मुहूर्त*\t\n https://web.datepanchang.com/ \t\n\t\n*Social Handles*\t\n*Facebook*\t\n https://www.facebook.com/DatePanchang \t\n*Youtube*\t\n https://www.youtube.com/channel/UCMFEM4bpAiYDdbSrFKuq6RA \t\n*Instagram*\t\n https://www.instagram.com/date.panchang/ \t\n*Twitter*\t\n https://twitter.com/DatePanchang \t\n*Telegram*\t\n https://t.me/datepanchang");
 
       return Ok();
 
