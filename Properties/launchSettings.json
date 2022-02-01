@@ -28,7 +28,11 @@
       "commandName": "Docker",
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
-      "publishAllPorts": true
+      "publishAllPorts": true,
+      "environmentVariables": {
+        "REDIS_PORT": "6379",
+        "WA_API_KEY": "16b62fa6472341e2c1ba60cc51a8221a",
+      }
     }
   }
 }
