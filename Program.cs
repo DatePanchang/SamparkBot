@@ -1,25 +1,40 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-//
-// Generated with Bot Builder V4 SDK Template for Visual Studio EchoBot v4.15.0
+var builder = WebApplication.CreateBuilder(args);
 
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+// Add services to the container.
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-namespace sampark_whatsapp_bot
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment()) {
+  app.UseSwagger();
+  app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+var summaries = new[]
 {
-  public class Program
-  {
-    public static void Main(string[] args)
-    {
-      CreateHostBuilder(args).Build().Run();
-    }
+    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+};
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-              webBuilder.UseStartup<Startup>();
-            });
-  }
+app.MapGet("/weatherforecast", () => {
+  var forecast = Enumerable.Range(1, 5).Select(index =>
+     new WeatherForecast
+     (
+         DateTime.Now.AddDays(index),
+         Random.Shared.Next(-20, 55),
+         summaries[Random.Shared.Next(summaries.Length)]
+     ))
+      .ToArray();
+  return forecast;
+})
+.WithName("GetWeatherForecast");
+
+app.Run();
+
+internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary) {
+  public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
