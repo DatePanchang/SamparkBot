@@ -22,7 +22,7 @@ public class WAAggregator {
 
   public async Task OnReceiveMessage(string messageId, string phone, string message) {
     try {
-      await WhatsappHelper.SendGupshupTextMsg();
+      // await Helper.SendGupshupTextMsg();
     } catch (Exception) {
     }
   }
@@ -43,5 +43,4 @@ public class WAAggregator {
   //    return false;
   //  }
   //}
-}
 }
