@@ -14,7 +14,7 @@ namespace SamparkBot {
     private static readonly string chatwootInboxId;
     
     private static readonly string whatsAppBizNumber = "919075025309";
-    private static readonly string aggregatorBaseUrl = "https://crm-portal-web.crm.datepanchang.com/api/v1/accounts/2/";
+    private static readonly string aggregatorBaseUrl;
     static Helper() {
       //redis = ConnectionMultiplexer.Connect(
       //      new ConfigurationOptions {
@@ -28,6 +28,7 @@ namespace SamparkBot {
       chatwootInboxId = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
         ? Environment.GetEnvironmentVariable("CHATWOOT_INBOX_PROD_ID") ?? ""
         : Environment.GetEnvironmentVariable("CHATWOOT_INBOX_DEV_ID") ?? "";
+      aggregatorBaseUrl = $"{Environment.GetEnvironmentVariable("CHATWOOT_BASE_URL") ?? ""}/api/v1/accounts/2/";
     }
 
     internal static async Task SendChatwootMsg(IncomingMessage message) {
@@ -40,8 +41,7 @@ namespace SamparkBot {
     private static async Task<ChatwootModels.Contact> GetChatwootContactByNumber(string? phone) {
       using var client = new HttpClient();
       using var request = new HttpRequestMessage(new HttpMethod("GET"), $"{aggregatorBaseUrl}contacts/search?q={phone?.Replace("+", "")}");
-      request.Headers.TryAddWithoutValidation("Content-Type", "application/json; charset=utf-8");
-      request.Headers.TryAddWithoutValidation("api_access_token", aggregatorApiKey);
+      AddChatwootHeaders(request);
 
       var response = await client.SendAsync(request);
 
@@ -50,6 +50,11 @@ namespace SamparkBot {
       } else {
         throw new Exception($"Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
       }
+    }
+
+    private static void AddChatwootHeaders(HttpRequestMessage request) {
+      request.Headers.TryAddWithoutValidation("Content-Type", "application/json; charset=utf-8");
+      request.Headers.TryAddWithoutValidation("api_access_token", aggregatorApiKey);
     }
 
     public static async Task SendGupshupTextMsg(string id, string phone, string txtMsg) {
