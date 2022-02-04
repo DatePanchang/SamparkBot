@@ -1,4 +1,4 @@
-using SamparkBot.ChatwootMedels;
+using SamparkBot;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddConsole();
@@ -15,9 +15,17 @@ if (app.Environment.IsDevelopment()) {
   app.UseSwaggerUI();
 }
 
-app.MapPost("/api/wa", async (OutgoingMessage message) => {
+// end point for gupshup like provider
+app.MapPost("/api/provider", async (SamparkBot.GupshupModels.IncomingMessage message) => {
+  Console.WriteLine($"/api/provider: Number {message.Payload?.Sender?.Phone} : {message.Payload?.Payload?.Text}");
+  await Helper.SendChatwootMsg(message);
+  return Results.Ok();
+});
+
+// end point for chatwoot like provider
+app.MapPost("/api/aggregator", async (SamparkBot.ChatwootModels.OutgoingMessage message) => {
   Console.WriteLine(message.Content);
-  // await Helper.SendGupshupTextMsg()
+    // await Helper.SendGupshupTextMsg()
 });
 
 app.Run();

@@ -1,4 +1,4 @@
-﻿namespace SamparkBot.ChatwootMedels {
+﻿namespace SamparkBot.ChatwootModels {
   public record Contact {
     public string InboxId { get; set; } = String.Empty;
     public string Name { get; set; } = String.Empty;
@@ -34,6 +34,9 @@
     public string Name { get; set; } = String.Empty;
   }
 
+  /// <summary>
+  /// Outgoing from chatwoot. Chatwoot agent sends message to customer
+  /// </summary>
   public record OutgoingMessage {
     public int Id { get; set; }
     public string Content { get; set; } = String.Empty;

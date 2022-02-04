@@ -18,7 +18,7 @@ public class WAProvider {
     //      });
   }
 
-  public async Task ProcessMessage(GupshupMedels.PostShape request) {
+  public async Task ProcessMessage(GupshupModels.PostShape request) {
     using HttpClient client = new();
 
     try {

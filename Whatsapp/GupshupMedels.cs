@@ -1,8 +1,13 @@
-﻿namespace SamparkBot.GupshupMedels {
+﻿namespace SamparkBot.GupshupModels {
   public record Payload {
     public string? Text { get; set; }
+    public string? Caption { get; set; }
+    public string? Url { get; set; }
+    public string? ContentType { get; set; }
+    public string? Type { get; set; }
+    public long? UrlExpiry { get; set; }
   }
-  public record Payload2 {
+  public record ParentPayload {
     public string? Text { get; set; }
     public string? Id { get; set; }
     public string? Source { get; set; }
@@ -24,11 +29,11 @@
     public string? GsId { get; set; }
   }
 
-  public record PostShape {
+  public record IncomingMessage {
     public string? App { get; set; }
     public long Timestamp { get; set; }
     public int Version { get; set; }
     public string? Type { get; set; }
-    public Payload2? Payload { get; set; }
+    public ParentPayload? Payload { get; set; }
   }
 }
