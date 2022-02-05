@@ -33,8 +33,33 @@ namespace SamparkBot {
 
     internal static async Task SendChatwootMsg(IncomingMessage message) {
       var chatwootContact = await GetChatwootContactByNumber(message.Payload?.Sender?.Phone);
+      var conversation = await GetChatwootConversation(chatwootContact);
       if (message.Payload?.Type == "text") {
         await SendChatwootTextMsg();
+      }
+    }
+
+    private static async Task<ChatwootModels.Conversation> GetChatwootConversation(ChatwootModels.Contact chatwootContact) {
+      using var client = new HttpClient();
+      using var request = new HttpRequestMessage(new HttpMethod("GET"), $"{aggregatorBaseUrl}contacts/{chatwootContact.Id}/conversations");
+      AddChatwootHeaders(request);
+
+      var response = await client.SendAsync(request);
+
+      if (response.StatusCode == System.Net.HttpStatusCode.OK) {
+        var contactSearch = JsonSerializer.Deserialize<List<ChatwootModels.Conversation>>(await response.Content.ReadAsStringAsync());
+        if (contactSearch == null || contactSearch.Count == 0) {
+          throw new Exception($"Message: Deserialization returned null or 0 contact conversations");
+        }
+        var conversation =  contactSearch.FirstOrDefault(conv => conv.Status != "resolved");
+
+        if (conversation == null) {
+          conversation = CreateChatwootConversation()
+        } else {
+
+        }
+      } else {
+        throw new Exception($"Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
       }
     }
 
@@ -46,7 +71,14 @@ namespace SamparkBot {
       var response = await client.SendAsync(request);
 
       if (response.StatusCode == System.Net.HttpStatusCode.OK) {
-        var contact = JsonSerializer.Deserialize<ChatwootModels.Contact>(await response.Content.ReadAsStringAsync());
+        var contactSearch = JsonSerializer.Deserialize<ChatwootModels.ContactSearch>(await response.Content.ReadAsStringAsync());
+        if (contactSearch == null) {
+          throw new Exception($"Message: Deserialization returned null");
+        } else if (contactSearch.Payload.Count == 0) {
+          var contact = await CreateChatwootContact();
+        } else {
+          return contactSearch.Payload[0];
+        }
       } else {
         throw new Exception($"Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
       }

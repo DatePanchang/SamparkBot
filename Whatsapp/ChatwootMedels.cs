@@ -1,10 +1,15 @@
 ﻿namespace SamparkBot.ChatwootModels {
-  public record Contact {
-    public string InboxId { get; set; } = String.Empty;
-    public string Name { get; set; } = String.Empty;
+  public class ContactSearch {
+    public List<Contact> Payload = new();
+  }
+  public class Contact {
     public string Email { get; set; } = String.Empty;
+    public string Name { get; set; } = String.Empty;
     public string PhoneNumber { get; set; } = String.Empty;
-    public string Identifier { get; set; } = String.Empty;
+    public string Thumbnail { get; set; } = String.Empty;
+    public Dictionary<string, string>? AdditionalAttributes { get; set; }
+    public int Id { get; set; }
+    public string AvailabilityStatus { get; set; } = String.Empty;
   }
 
   public record Sender {
