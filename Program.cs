@@ -24,8 +24,8 @@ app.MapPost("/api/provider", async (SamparkBot.GupshupModels.IncomingMessage mes
 
 // end point for chatwoot like provider
 app.MapPost("/api/aggregator", async (SamparkBot.ChatwootModels.OutgoingMessage message) => {
-  Console.WriteLine(message.Content);
-    // await Helper.SendGupshupTextMsg()
+    Console.WriteLine(message.Content);
+    await Helper.SendGupshupTextMsg(message)
 });
 
 app.Run();

@@ -1,20 +1,19 @@
-﻿using Newtonsoft.Json.Linq;
-
-using SamparkBot.GupshupModels;
-using SamparkBot.Models;
+﻿using SamparkBot.GupshupModels;
 
 using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace SamparkBot {
   public class Helper {
+    private const string gupshupUrl = "https://api.gupshup.io/sm/api/v1/msg";
+    private const string whatsAppBizNumber = "919075025309";
+
     private static readonly string providerApiKey;
     private static readonly string gupshupApp;
     private static readonly string aggregatorApiKey;
     private static readonly string chatwootInboxId;
-    
-    private static readonly string whatsAppBizNumber = "919075025309";
     private static readonly string aggregatorBaseUrl;
+
     static Helper() {
       //redis = ConnectionMultiplexer.Connect(
       //      new ConfigurationOptions {
@@ -33,11 +32,11 @@ namespace SamparkBot {
 
     internal static async Task SendChatwootMsg(IncomingMessage message) {
       if (message.Payload?.Sender is null) {
-        throw new Exception($"Message: Sender null in gupshup respose");
+        throw new Exception($"Scope: SendChatwootMsg, Message: Sender null in gupshup respose");
       }
       var conversation = await GetChatwootConversationByNumber(message.Payload.Sender);
       if (message.Payload?.Type == "text") {
-        await SendChatwootTextMsg();
+        await SendChatwootTextMsg(conversation, message.Payload?.Payload?.Text ?? "");
       }
     }
 
@@ -51,9 +50,9 @@ namespace SamparkBot {
       if (response.StatusCode == System.Net.HttpStatusCode.OK) {
         var contactConversationsPayload = JsonSerializer.Deserialize<ChatwootModels.ContactConversaionsPayload>(await response.Content.ReadAsStringAsync());
         if (contactConversationsPayload == null) {
-          throw new Exception($"Message: Deserialization returned null contact conversations payload");
+          throw new Exception($"Scope: GetChatwootConversationByContact, Message: Deserialization returned null contact conversations payload");
         }
-        var conversation =  contactConversationsPayload.Payload
+        var conversation = contactConversationsPayload.Payload
           .OrderByDescending(conversation => conversation.Timestamp)
           .FirstOrDefault(conv => conv.Status != "resolved");
 
@@ -62,18 +61,18 @@ namespace SamparkBot {
           if (inbox is null) {
             inbox = await CreateContactInbox(chatwootContact);
             if (inbox is null) {
-              throw new Exception($"Message: Contact does not contain inbox for whatsapp");
+              throw new Exception($"Scope: GetChatwootConversationByContact, Message: Contact does not contain inbox for whatsapp");
             }
           }
           conversation = await CreateChatwootConversation(chatwootContact.Id, inbox.SourceId);
         }
         return conversation;
       } else {
-        throw new Exception($"Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
+        throw new Exception($"Scope: GetChatwootConversationByContact, Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
       }
     }
 
-    private static async Task<ChatwootModels.ContactInbox?> CreateContactInbox(ChatwootModels.Contact chatwootContact) {
+    private static async Task<ChatwootModels.ContactInbox> CreateContactInbox(ChatwootModels.Contact chatwootContact) {
       using var client = new HttpClient();
       using var request = new HttpRequestMessage(new HttpMethod("POST"), $"{aggregatorBaseUrl}contacts/{chatwootContact.Id}/contact_inboxes");
       AddChatwootHeaders(request);
@@ -84,6 +83,13 @@ namespace SamparkBot {
 
       var response = await client.SendAsync(request);
       if (response.StatusCode == System.Net.HttpStatusCode.OK) {
+        var contactInbox = JsonSerializer.Deserialize<ChatwootModels.ContactInbox>(await response.Content.ReadAsStringAsync());
+        if (contactInbox is null) {
+          throw new Exception($"Scope: CreateContactInbox, Message: Deserialization returned null contact inbox in create contactInbox for contact");
+        }
+        return contactInbox;
+      } else {
+        throw new Exception($"Scope: CreateContactInbox, Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
       }
     }
 
@@ -103,11 +109,11 @@ namespace SamparkBot {
       if (response.StatusCode == System.Net.HttpStatusCode.OK) {
         var conversation = JsonSerializer.Deserialize<ChatwootModels.Conversation>(await response.Content.ReadAsStringAsync());
         if (conversation == null) {
-          throw new Exception($"Message: Deserialization returned null conversation in create conversation");
+          throw new Exception($"Scope: CreateChatwootConversation, Message: Deserialization returned null conversation in create conversation");
         }
         return conversation;
       } else {
-        throw new Exception($"Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
+        throw new Exception($"Scope: CreateChatwootConversation, Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
       }
     }
 
@@ -123,7 +129,7 @@ namespace SamparkBot {
         ChatwootModels.Conversation conversation;
         var contactSearch = JsonSerializer.Deserialize<ChatwootModels.ContactSearch>(await response.Content.ReadAsStringAsync());
         if (contactSearch == null) {
-          throw new Exception($"Message: Deserialization returned null");
+          throw new Exception($"Scope: GetChatwootConversationByNumber, Message: Deserialization returned null");
         } else if (contactSearch.Payload.Count == 0) {
           var contactPayload = await CreateChatwootContact(sender);
           contact = contactPayload.Contact;
@@ -134,7 +140,7 @@ namespace SamparkBot {
         }
         return conversation;
       } else {
-        throw new Exception($"Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
+        throw new Exception($"Scope: GetChatwootConversationByNumber, Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
       }
     }
 
@@ -154,12 +160,12 @@ namespace SamparkBot {
       if (response.StatusCode == System.Net.HttpStatusCode.OK) {
         var contactPayload = JsonSerializer.Deserialize<ChatwootModels.ContactPayload>(await response.Content.ReadAsStringAsync());
         if (contactPayload == null) {
-          throw new Exception($"Message: Deserialization of create contact response of Chatwoot returned null");
+          throw new Exception($"Scope: CreateChatwootContact, Message: Deserialization of create contact response of Chatwoot returned null");
         } else {
           return contactPayload;
         }
       } else {
-        throw new Exception($"Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
+        throw new Exception($"Scope: CreateChatwootContact, Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
       }
     }
 
@@ -168,19 +174,23 @@ namespace SamparkBot {
       request.Headers.TryAddWithoutValidation("api_access_token", aggregatorApiKey);
     }
 
-    public static async Task SendGupshupTextMsg(string id, string phone, string txtMsg) {
+    public static async Task SendGupshupTextMsg(ChatwootModels.OutgoingMessage message) {
       using var client = new HttpClient();
-      using var request = new HttpRequestMessage(new HttpMethod("POST"), "https://api.gupshup.io/sm/api/v1/msg");
+      using var request = new HttpRequestMessage(new HttpMethod("POST"), gupshupUrl);
       request.Headers.TryAddWithoutValidation("Cache-Control", "no-cache");
       request.Headers.TryAddWithoutValidation("apikey", providerApiKey);
 
+      if (message.Sender?.Id is null) {
+        throw new Exception($"Scope: SendGupshupTextMsg, Message: Sender id not valid in webhook payload from chatwood");
+      }
+      var contact = await GetChatwootContactById(message.Sender.Id);
+
       var contentList = new List<string> {
-        $"id={Uri.EscapeDataString(id)}",
         $"channel={Uri.EscapeDataString("whatsapp")}",
         $"source={Uri.EscapeDataString(whatsAppBizNumber)}",
-        $"destination={Uri.EscapeDataString(phone)}",
+        $"destination={Uri.EscapeDataString(contact.PhoneNumber.Replace("+", ""))}",
         $"src.name={Uri.EscapeDataString(gupshupApp)}",
-        $"message={Uri.EscapeDataString("{\"type\": \"text\",\"text\": \"" + txtMsg + "\"}")}",
+        $"message={Uri.EscapeDataString("{\"type\": \"text\",\"text\": \"" + message.Content + "\"}")}",
         $"disablePreview={Uri.EscapeDataString("true")}"
       };
       request.Content = new StringContent(string.Join("&", contentList));
@@ -189,18 +199,40 @@ namespace SamparkBot {
       var response = await client.SendAsync(request);
     }
 
-    public static async Task SendChatwootTextMsg(Contact contact, Channel channel, string txtMsg) {
+    private static async Task<ChatwootModels.Contact> GetChatwootContactById(string id) {
       using var client = new HttpClient();
-      using var request = new HttpRequestMessage(new HttpMethod("POST"), $"{aggregatorBaseUrl}contactCreate");
-      request.Headers.TryAddWithoutValidation("Cache-Control", "no-cache");
-      request.Headers.TryAddWithoutValidation("api_access_token", aggregatorApiKey);
+      using var request = new HttpRequestMessage(new HttpMethod("POST"), $"{aggregatorBaseUrl}contacts/{id}");
 
-      
-      //request.Content = new JsonContent() {
+      AddChatwootHeaders(request);
+      var response = await client.SendAsync(request);
+      if (response.StatusCode == System.Net.HttpStatusCode.OK) {
+        var contactPayload = JsonSerializer.Deserialize<ChatwootModels.ContactPayload>(await response.Content.ReadAsStringAsync());
+        if (contactPayload is null) {
+          throw new Exception($"Scope: GetChatwootContactById, Message: Deserialized contactPayload is null");
+        }
+        return contactPayload.Contact;
+      } else {
+        throw new Exception($"Scope: GetChatwootContactById, Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
+      }
+    }
 
-      //};
+    public static async Task SendChatwootTextMsg(ChatwootModels.Conversation conversation, string txtMsg) {
+      using var client = new HttpClient();
+      using var request = new HttpRequestMessage(new HttpMethod("POST"), $"{aggregatorBaseUrl}conversations/{conversation.Id}/messages");
+
+      AddChatwootHeaders(request);
+
+      request.Content = JsonContent.Create(new {
+        content = txtMsg,
+        message_type = "incoming",
+        @private = true
+      });
 
       var response = await client.SendAsync(request);
+
+      if (response.StatusCode != System.Net.HttpStatusCode.OK) {
+        throw new Exception($"Scope: SendChatwootTextMsg, Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
+      }
     }
   }
 }
