@@ -4,8 +4,15 @@
   }
 
   public class ContactPayload {
-    public Contact Contact { get; set; } = new Contact();
-    public ContactInbox ContactInbox { get; set; } = new ContactInbox();
+    public Contact Payload = new();
+  }
+
+  public class CreateContactResponse {
+    public CreateContactPayload Payload = new ();
+  }
+  public class CreateContactPayload {
+    public Contact Contact { get; set; } = new ();
+    public ContactInbox ContactInbox { get; set; } = new ();
   }
 
   public class ContactConversaionsPayload {
@@ -13,7 +20,7 @@
   }
 
   public class ContactInbox {
-    public Inbox Inbox { get; set; } = new Inbox();
+    public Inbox Inbox { get; set; } = new ();
     public string SourceId { get; set; } = string.Empty;
   }
 
@@ -24,29 +31,30 @@
     public string Thumbnail { get; set; } = String.Empty;
     public Dictionary<string, string>? AdditionalAttributes { get; set; }
     public List<ContactInbox> ContactInboxes { get; set; } = new();
-    public string Id { get; set; } = string.Empty;
+    public int Id { get; set; }
     public string AvailabilityStatus { get; set; } = String.Empty;
   }
 
   public record Sender {
-    public string Id { get; set; } = String.Empty;
+    public int Id { get; set; }
     public string Name { get; set; } = String.Empty;
     public string Avatar { get; set; } = String.Empty;
     public string Type { get; set; } = String.Empty;
   }
 
   public record Inbox {
-    public string Id { get; set; } = String.Empty;
+    public int Id { get; set; }
     public string Name { get; set; } = String.Empty;
   }
 
   public record Conversation {
-    public string Id { get; set; } = String.Empty;
-    public string InboxId { get; set; } = String.Empty;
+    public int Id { get; set; }
+    public int InboxId { get; set; }
     public string Status { get; set; } = String.Empty;
     public int AgentLastSeenAt { get; set; }
     public int ContactLastSeenAt { get; set; }
     public int Timestamp { get; set; }
+    public Dictionary<string, string>? AdditionalAttributes { get; set; }
   }
 
   /// <summary>

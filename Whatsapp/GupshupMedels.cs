@@ -8,7 +8,6 @@
     public long? UrlExpiry { get; set; }
   }
   public record ParentPayload {
-    public string? Text { get; set; }
     public string? Id { get; set; }
     public string? Source { get; set; }
     public string? Type { get; set; }

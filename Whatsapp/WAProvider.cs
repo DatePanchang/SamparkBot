@@ -3,8 +3,6 @@
 //
 // Generated with Bot Builder V4 SDK Template for Visual Studio EchoBot v4.15.0
 
-using Microsoft.AspNetCore.Mvc;
-
 namespace SamparkBot;
 public class WAProvider {
   public WAProvider() {
@@ -18,11 +16,9 @@ public class WAProvider {
     //      });
   }
 
-  public async Task ProcessMessage(GupshupModels.PostShape request) {
-    using HttpClient client = new();
-
+  public static async Task OnReceiveMessage(GupshupModels.IncomingMessage request) {
     try {
-      //await Helper.SendChatwwotTextMsg();
+      await Helper.SendChatwootMsg(request);
     } catch (Exception ex) {
       Console.Error.WriteLine(ex);
       return;

@@ -5,42 +5,18 @@
 
 using Microsoft.AspNetCore.Mvc;
 
+using SamparkBot.GupshupModels;
+
 namespace SamparkBot;
 public class WAAggregator {
   public WAAggregator() {
   }
 
-  private static readonly string aggregatorApiKey;
-  //private static readonly ConnectionMultiplexer redis;
-  static WAAggregator() {
-    //redis = ConnectionMultiplexer.Connect(
-    //      new ConfigurationOptions {
-    //        EndPoints = { "host.docker.internal:6379" }
-    //      });
-    aggregatorApiKey = Environment.GetEnvironmentVariable("CHATWOOT_API_KEY") ?? "";
-  }
-
-  public async Task OnReceiveMessage(string messageId, string phone, string message) {
+  public static async Task OnReceiveMessage(ChatwootModels.OutgoingMessage message) {
     try {
-      // await Helper.SendGupshupTextMsg();
-    } catch (Exception) {
+      await Helper.SendGupshupTextMsg(message);
+    } catch (Exception ex) {
+      Console.Error.WriteLine(ex.Message);
     }
   }
-
-
-
-
-  //private async Task<bool> IsRecentUser(string mobile) {
-  //  try {
-  //    var db = redis.GetDatabase();
-  //    if (await db.KeyExistsAsync(mobile)) {
-  //      return true;
-  //    } else {
-  //      await db.StringSetAsync(mobile, "", TimeSpan.FromDays(3));
-  //      return false;
-  //    }
-  //  } catch (Exception ex) {
-  //    return false;
-  //  }
-  //}
 }
