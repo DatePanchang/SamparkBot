@@ -37,8 +37,9 @@ namespace SamparkBot {
     }
 
     internal static async Task SendChatwootMsg(IncomingMessage message) {
+      // messages from gupshup not having sender should be ignored
       if (message.Payload?.Sender is null) {
-        throw new Exception($"Scope: SendChatwootMsg, Message: Sender null in gupshup respose");
+        return;
       }
       var conversation = await GetOrCreateChatwootConversationByPhone(message.Payload.Sender);
       if (message.Payload?.Type == "text") {
