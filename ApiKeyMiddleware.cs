@@ -6,7 +6,7 @@
       _next = next;
     }
     public async Task InvokeAsync(HttpContext context) {
-      if (!context.Request.Headers.TryGetValue(APIKEYNAME, out var extractedApiKey)) {
+      if (!context.Request.Headers.TryGetValue(APIKEYNAME, out var extractedApiKey) && !context.Request.Query.TryGetValue(APIKEYNAME, out extractedApiKey)) {
         context.Response.StatusCode = 401;
         await context.Response.WriteAsync("Api Key was not provided. (Using ApiKeyMiddleware) ");
         return;
