@@ -20,15 +20,20 @@ namespace SamparkBot {
       whatsAppBizNumber = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
         ? "919075025309"
         : "917834811114";
+      
       providerApiKey = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
-        ? Environment.GetEnvironmentVariable("WA_API_PROD_KEY") ?? ""
-        : Environment.GetEnvironmentVariable("WA_API_DEV_KEY") ?? "";
-      gupshupApp = Environment.GetEnvironmentVariable("GUPSHUP_APP") ?? "";
-      aggregatorApiKey = Environment.GetEnvironmentVariable("AGGREGATOR_API_KEY") ?? "";
+        ? Environment.GetEnvironmentVariable("WA_API_PROD_KEY") ?? throw new Exception("Ebvironment variable WA_API_PROD_KEY not found")
+        : Environment.GetEnvironmentVariable("WA_API_DEV_KEY") ?? throw new Exception("Ebvironment variable WA_API_DEV_KEY not found");
+
+      gupshupApp = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
+        ? Environment.GetEnvironmentVariable("GUPSHUP_PROD_APP") ?? throw new Exception("Ebvironment variable GUPSHUP_PROD_APP not found")
+        : Environment.GetEnvironmentVariable("GUPSHUP_DEV_APP") ?? throw new Exception("Ebvironment variable GUPSHUP_DEV_APP not found");
+
+      aggregatorApiKey = Environment.GetEnvironmentVariable("AGGREGATOR_API_KEY") ?? throw new Exception("Ebvironment variable AGGREGATOR_API_KEY not found");
       chatwootInboxId = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
-        ? int.Parse(Environment.GetEnvironmentVariable("CHATWOOT_INBOX_PROD_ID") ?? "0")
-        : int.Parse(Environment.GetEnvironmentVariable("CHATWOOT_INBOX_DEV_ID") ?? "0");
-      aggregatorBaseUrl = $"{Environment.GetEnvironmentVariable("CHATWOOT_BASE_URL") ?? ""}/api/v1/accounts/2/";
+        ? int.Parse(Environment.GetEnvironmentVariable("CHATWOOT_INBOX_PROD_ID") ?? throw new Exception("Ebvironment variable CHATWOOT_INBOX_PROD_ID not found"))
+        : int.Parse(Environment.GetEnvironmentVariable("CHATWOOT_INBOX_DEV_ID") ?? throw new Exception("Ebvironment variable CHATWOOT_INBOX_DEV_ID not found"));
+      aggregatorBaseUrl = $"{Environment.GetEnvironmentVariable("CHATWOOT_BASE_URL") ?? throw new Exception("Ebvironment variable WA_API_PROD_KEY not found")}/api/v1/accounts/2/";
     }
 
     internal static async Task SendChatwootMsg(IncomingMessage message) {

@@ -31,6 +31,8 @@ if (app.Environment.IsDevelopment()) {
   app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ApiKeyMiddleware>();
+
 // end point for gupshup like provider
 app.MapPost("/api/provider", async (SamparkBot.GupshupModels.IncomingMessage message) => {
   Console.WriteLine($"/api/provider: Number {message.Payload?.Sender?.Phone} : {message.Payload?.Payload?.Text}");
