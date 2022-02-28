@@ -34,14 +34,14 @@ if (app.Environment.IsDevelopment()) {
 app.UseMiddleware<ApiKeyMiddleware>();
 
 // end point for gupshup like provider
-app.MapPost("/api/provider", async (SamparkBot.GupshupModels.IncomingMessage message) => {
-  Console.WriteLine($"/api/provider: Number {message.Payload?.Sender?.Phone} : {message.Payload?.Payload?.Text}");
+app.MapPost("/api/wa/provider", async (SamparkBot.GupshupModels.IncomingMessage message) => {
+  Console.WriteLine($"/api/wa/provider: Number {message.Payload?.Sender?.Phone} : {message.Payload?.Payload?.Text}");
   await WAProvider.OnReceiveMessage(message);
   return Results.Ok();
 });
 
 // end point for chatwoot like provider
-app.MapPost("/api/aggregator", async (SamparkBot.ChatwootModels.OutgoingMessage message) => {
+app.MapPost("/api/wa/aggregator", async (SamparkBot.ChatwootModels.OutgoingMessage message) => {
   Console.WriteLine(message.Content);
   await WAAggregator.OnReceiveMessage(message);
 });
