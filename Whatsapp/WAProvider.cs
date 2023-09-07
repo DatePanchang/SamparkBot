@@ -18,6 +18,7 @@ public class WAProvider {
 
   public static async Task OnReceiveMessage(GupshupModels.IncomingMessage request) {
     try {
+      Console.WriteLine($"sender: {request.Payload?.Sender?.Name}");
       await Helper.SendChatwootMsg(request);
     } catch (Exception ex) {
       Console.Error.WriteLine(ex);

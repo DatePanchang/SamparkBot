@@ -14,7 +14,11 @@ public class WAAggregator {
 
   public static async Task OnReceiveMessage(ChatwootModels.OutgoingMessage message) {
     try {
-      await Helper.SendGupshupTextMsg(message);
+      if (message.Sender?.Type.ToLower() != "contact") {
+        Console.WriteLine($"sender: {message.Sender?.Type.ToLower()}, message: {message.Content}");
+        await Helper.SendGupshupTextMsg(message);
+        Console.WriteLine($"Message sent to Gupshup: {message.Content}");
+      } 
     } catch (Exception ex) {
       Console.Error.WriteLine(ex.Message);
     }
