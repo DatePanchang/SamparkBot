@@ -33,7 +33,7 @@ namespace SamparkBot {
       chatwootInboxId = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
         ? int.Parse(Environment.GetEnvironmentVariable("CHATWOOT_INBOX_PROD_ID") ?? throw new Exception("Ebvironment variable CHATWOOT_INBOX_PROD_ID not found"))
         : int.Parse(Environment.GetEnvironmentVariable("CHATWOOT_INBOX_DEV_ID") ?? throw new Exception("Ebvironment variable CHATWOOT_INBOX_DEV_ID not found"));
-      aggregatorBaseUrl = $"{Environment.GetEnvironmentVariable("CHATWOOT_BASE_URL") ?? throw new Exception("Ebvironment variable WA_API_PROD_KEY not found")}/api/v1/accounts/2/";
+      aggregatorBaseUrl = $"{Environment.GetEnvironmentVariable("CHATWOOT_BASE_URL") ?? throw new Exception("Ebvironment variable WA_API_PROD_KEY not found")}/api/v1/accounts/1/";
     }
 
     internal static async Task SendChatwootMsg(IncomingMessage message) {
