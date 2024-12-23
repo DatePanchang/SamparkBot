@@ -129,7 +129,7 @@ namespace SamparkBot {
 
     private static async Task<ChatwootModels.Conversation> GetOrCreateChatwootConversationByPhone(Sender sender) {
       using var client = new HttpClient();
-      using var request = new HttpRequestMessage(new HttpMethod("GET"), $"{aggregatorBaseUrl}api/v1/accounts/1/contacts/search?q={sender.Phone?.Replace("+", "")}");
+      using var request = new HttpRequestMessage(new HttpMethod("GET"), $"{aggregatorBaseUrl}contacts/search?q={sender.Phone?.Replace("+", "")}");
       AddChatwootHeaders(request);
 
       var response = await client.SendAsync(request);
