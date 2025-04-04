@@ -20,7 +20,7 @@ namespace SamparkBot {
       whatsAppBizNumber = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
         ? "919075025309"
         : "917834811114";
-      
+
       providerApiKey = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
         ? Environment.GetEnvironmentVariable("WA_API_PROD_KEY") ?? throw new Exception("Ebvironment variable WA_API_PROD_KEY not found")
         : Environment.GetEnvironmentVariable("WA_API_DEV_KEY") ?? throw new Exception("Ebvironment variable WA_API_DEV_KEY not found");
@@ -111,7 +111,7 @@ namespace SamparkBot {
         source_id = sourceId,
         inbox_id = chatwootInboxId,
         contact_id = contactId,
-        additional_attributes = new Dictionary<string, string> { { contactIdKey, $"{contactId}"} }
+        additional_attributes = new Dictionary<string, string> { { contactIdKey, $"{contactId}" } }
       });
 
       var response = await client.SendAsync(request);
@@ -168,7 +168,7 @@ namespace SamparkBot {
         inbox_id = chatwootInboxId,
         name = sender.Name,
         phone_number = sender.Phone.StartsWith("+")
-          ? sender.Phone 
+          ? sender.Phone
           : "+" + sender.Phone
       });
 
@@ -187,32 +187,49 @@ namespace SamparkBot {
     }
 
     private static void AddChatwootHeaders(HttpRequestMessage request) {
+      Console.WriteLine("Adding Chatwoot headers to request");
       request.Headers.TryAddWithoutValidation("Content-Type", "application/json; charset=utf-8");
       request.Headers.TryAddWithoutValidation("api_access_token", aggregatorApiKey);
+      // log aggregatorApiKey
+      Console.WriteLine($"Aggregator API Key: {aggregatorApiKey}");
+      Console.WriteLine("Chatwoot headers added successfully");
     }
 
     public static async Task SendGupshupTextMsg(ChatwootModels.OutgoingMessage message) {
+      Console.WriteLine($"SendGupshupTextMsg: Started processing message with ID: {message.Id}");
+
       if (message.Sender?.Type == "contact") {
+        Console.WriteLine($"SendGupshupTextMsg: Ignoring message from contact, Message ID: {message.Id}");
         return;
       }
 
+      Console.WriteLine($"SendGupshupTextMsg: Creating HTTP client and request to {gupshupUrl}");
       using var client = new HttpClient();
       using var request = new HttpRequestMessage(new HttpMethod("POST"), gupshupUrl);
       request.Headers.TryAddWithoutValidation("Cache-Control", "no-cache");
       request.Headers.TryAddWithoutValidation("apikey", providerApiKey);
+      Console.WriteLine("SendGupshupTextMsg: Headers added to request");
 
       int? conversationId = message.Conversation?.Id;
       if (conversationId is null) {
+        Console.WriteLine("SendGupshupTextMsg: Conversation ID is null");
         throw new Exception($"Scope: SendGupshupTextMsg, Message: Conversation id not valid in webhook payload from chatwood");
       }
+      Console.WriteLine($"SendGupshupTextMsg: Getting conversation by ID: {conversationId}");
       var conversation = await GetChatwootConversationById(conversationId.Value);
+      Console.WriteLine($"SendGupshupTextMsg: Retrieved conversation with ID: {conversation.Id}");
 
       if (conversation.AdditionalAttributes is null || !conversation.AdditionalAttributes.ContainsKey(contactIdKey)) {
+        Console.WriteLine("SendGupshupTextMsg: Missing contact ID in conversation attributes");
         throw new Exception($"Scope: SendGupshupTextMsg, Message: Conversation doesnot contain additional attributes or an attribute with contactId key");
       }
 
-      var contact = await GetChatwootContactById(int.Parse(conversation.AdditionalAttributes[contactIdKey]));
+      int contactId = int.Parse(conversation.AdditionalAttributes[contactIdKey]);
+      Console.WriteLine($"SendGupshupTextMsg: Getting contact by ID: {contactId}");
+      var contact = await GetChatwootContactById(contactId);
+      Console.WriteLine($"SendGupshupTextMsg: Retrieved contact: {contact.Name} with phone: {contact.PhoneNumber}");
 
+      Console.WriteLine("SendGupshupTextMsg: Preparing request content");
       var contentList = new List<string> {
           $"channel={Uri.EscapeDataString("whatsapp")}",
           $"source={Uri.EscapeDataString(whatsAppBizNumber)}",
@@ -223,13 +240,19 @@ namespace SamparkBot {
         };
       request.Content = new StringContent(string.Join("&", contentList));
       request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
+      Console.WriteLine($"SendGupshupTextMsg: Sending message to {contact.PhoneNumber}");
 
+      Console.WriteLine("SendGupshupTextMsg: Sending request to Gupshup API");
       var response = await client.SendAsync(request);
+      Console.WriteLine($"SendGupshupTextMsg: Received response with status code: {response.StatusCode}");
 
       if (response.StatusCode != System.Net.HttpStatusCode.OK) {
-        throw new Exception($"Scope: SendGupshupTextMsg, Status: {response.StatusCode}, Message: {await response.Content.ReadAsStringAsync()}");
+        string errorContent = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"SendGupshupTextMsg: Error response content: {errorContent}");
+        throw new Exception($"Scope: SendGupshupTextMsg, Status: {response.StatusCode}, Message: {errorContent}");
       }
 
+      Console.WriteLine("SendGupshupTextMsg: Successfully sent message to Gupshup");
     }
 
     private static async Task<ChatwootModels.Conversation> GetChatwootConversationById(int id) {
