@@ -25,6 +25,9 @@ JsonConvert.DefaultSettings = () => new JsonSerializerSettings {
 
 var app = builder.Build();
 
+// Add a log message to indicate application initialization
+Console.WriteLine("Application has started successfully.");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) {
   app.UseSwagger();
